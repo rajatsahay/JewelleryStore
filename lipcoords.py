@@ -129,6 +129,15 @@ while True:
         #faceAligned=fa.align(frame,gray,rect)
 
         
+        mouth_x1=landmarks.part(48).x
+        mouth_y1=landmarks.part(48).y
+        mouth_x2=landmarks.part(51).x
+        mouth_y2=landmarks.part(51).y
+        mouth_x3=landmarks.part(54).x
+        mouth_y3=landmarks.part(54).y
+        mouth_x4=landmarks.part(57).y
+        mouth_y4=landmarks.part(57).y
+
         for n in range(48,58,3):
             x = landmarks.part(n).x
             y = landmarks.part(n).y
@@ -139,9 +148,23 @@ while True:
             #send landmark_points to server A
             #send data to server
     
-    #print(mouth_coords)
-    mouth_json=json.dumps(mouth_coords)        
-    #print(mouth_json)
+        mouth_json={
+        'mouth_x1':mouth_x1,
+        'mouth_y1':mouth_y1,
+        'mouth_x2':mouth_x2,
+        'mouth_y2':mouth_y2,
+        'mouth_x3':mouth_x3,
+        'mouth_y3':mouth_y3,
+        'mouth_x4':mouth_x4,
+        'mouth_y4':mouth_y4
+        }
+        #print(mouth_coords)
+        mouth_json_coords=json.dumps(mouth_json)
+        headers={
+        'Content-type':'application/json',
+        'Accept':'text/plain'
+        }        
+    #print(mouth_json_coords)
     cv2.imshow("Frame", frame)
     #cv2.imshow("Face Aligned",faceAligned)
 

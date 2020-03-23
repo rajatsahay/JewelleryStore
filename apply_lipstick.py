@@ -10,9 +10,10 @@ r,g,b = (00.,00.,200.)		#lipstick color
 up_left_end = 3
 up_right_end = 5
 mouth=[]
+noOfFrame=0
 #mouth=np.array(mouth)
 
-def inter(lx=[],ly=[],k1='quadratic'):
+def inter(lx=[],ly=[],k1='quadratic',fill_value="extrapolate"):
 	unew = np.arange(lx[0], lx[-1]+1, 1)
 	f2 = interp1d(lx, ly, kind=k1)
 	return (f2,unew)
@@ -23,6 +24,8 @@ detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
 while True:
+	noOfFrame+=1
+	print("Frame:",noOfFrame)
 	_, frame = cap.read()
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	frame=cv2.resize(frame,(700,700))
@@ -47,87 +50,166 @@ while True:
 			y = landmarks.part(n).y
 			mouth=np.append(mouth,[[x,y]],axis=0)	
 			
-		
-			#mouth=np.loadtxt("/home/rajat/Desktop/CamCann/d.txt")
-			points =  np.floor(mouth)
-			print(points)
-			point_out_x = np.array((points[:len(points)//2][:,0]))
-			point_out_y = np.array(points[:len(points)//2][:,1])
-			point_in_x = (points[len(points)//2:][:,0])
-			point_in_y = points[len(points)//2:][:,1]
-
-					
-			#figure()
-			#im = imread('Input.jpg')
-
-			# Code for the curves bounding the lips
-			o_u_l = inter(point_out_x[:up_left_end],point_out_y[:up_left_end])
-			o_u_r = inter(point_out_x[up_left_end-1:up_right_end],point_out_y[up_left_end-1:up_right_end])
-			o_l = inter([point_out_x[0]]+point_out_x[up_right_end-1:][::-1].tolist(),[point_out_y[0]]+point_out_y[up_right_end-1:][::-1].tolist(),'cubic')
-			i_u_l = inter(point_in_x[:up_left_end],point_in_y[:up_left_end])
-			for i in range()
-			print(point_out_x)
-			print(point_out_y)
-			print(o_u_l)	
-			#print(inter(point_in_x[0:3],point_in_y[0:3]))	
-			i_u_r = inter(point_in_x[up_left_end-1:up_right_end],point_in_y[up_left_end-1:up_right_end])
-
-			i_l = inter([point_in_x[0]]+point_in_x[up_right_end-1:][::-1].tolist(),[point_in_y[0]]+point_in_y[up_right_end-1:][::-1].tolist(),'cubic')
-
-			x = []	#will contain the x coordinates of points on lips
-			y = []  #will contain the y coordinates of points on lips
-
-			def ext(a,b,i):
-				a=int(np.round(a))
-				b=int(np.round(b))
-				#print(arange(a,b,1))
-				x.extend(arange(a,b,1).tolist())
-				y.extend((ones(b-a)*i).tolist())
-
-			for i in range(int(o_u_l[1][0]),int(i_u_l[1][0]+1)):
-				ext(o_u_l[0](i), o_l[0](i)+1, i)
-
-			for i in range(int(i_u_l[1][0]),int(o_u_l[1][-1]+1)):
-				ext(o_u_l[0](i),i_u_l[0](i)+1,i)
-				ext(i_l[0](i),o_l[0](i)+1,i)
-
-			for i in range(int(i_u_r[1][-1]),int(o_u_r[1][-1]+1)):
-				ext(o_u_r[0](i),o_l[0](i)+1,i)
-
-			for i in range(int(i_u_r[1][0]),int(i_u_r[1][-1]+1)):
-				ext(o_u_r[0](i),i_u_r[0](i)+1,i)
-				ext(i_l[0](i),o_l[0](i)+1,i)
-
-			# Now x and y contains coordinates of all the points on lips
-
-			int_x=[int(z) for z in x]
-			int_y=[int(z) for z in y]
-
-			#int_x = map(int,x)
-			#int_y = map(int,y)
-
-			#print(x)
-			#print("\n")
-			#print(int_y)
-			#print(im[int_x,:])
-			#val = color.rgb2lab((frame[x,y]/255.).reshape(len(x),1,3)).reshape(len(x),3)
-			#print(frame.shape)
-			frame=cv2.resize(frame,(700,700))
-			val = color.rgb2lab((frame[int_x,int_y]/255.).reshape(len(int_x),1,3)).reshape(len(int_x),3)
-			L,A,B = mean(val[:,0]),mean(val[:,1]),mean(val[:,2])
-			L1,A1,B1 = color.rgb2lab(np.array((r/255.,g/255.,b/255.)).reshape(1,1,3)).reshape(3,)
-			ll,aa,bb = L1-L,A1-A,B1-B
-			val[:,0] += ll
-			val[:,1] += aa
-			val[:,2] += bb
-
-			#val[:,0] = np.clip(val[:,0], 0, 100)
-			#val[:,1] = np.clip(val[:,1], -127, 128)
-			#val[:,2] = np.clip(val[:,2], -127, 128)
-
-			frame[int_x,int_y] = color.lab2rgb(val.reshape(len(int_x),1,3)).reshape(len(int_x),3)*255
-			gca().set_aspect('equal', adjustable='box')
 	
+		#mouth=np.loadtxt("/home/rajat/Desktop/CamCann/d.txt")
+		points =  np.floor(mouth)
+		point_out_x = np.array((points[:len(points)//2][:,0]))
+		point_out_y = np.array(points[:len(points)//2][:,1])
+		point_in_x = (points[len(points)//2:][:,0])
+		point_in_y = points[len(points)//2:][:,1]
+				
+		#figure()
+		#im = imread('Input.jpg')
+
+		# Code for the curves bounding the lips
+		print(points)
+		o_u_l = inter(point_out_x[:up_left_end],point_out_y[:up_left_end])
+		o_u_r = inter(point_out_x[up_left_end-1:up_right_end],point_out_y[up_left_end-1:up_right_end])
+		o_l = inter([point_out_x[0]]+point_out_x[up_right_end-1:][::-1].tolist(),[point_out_y[0]]+point_out_y[up_right_end-1:][::-1].tolist(),'cubic')
+		i_u_l = inter(point_in_x[:up_left_end],point_in_y[:up_left_end])
+		#print(point_out_x)
+		o_u_l = inter(point_out_x[:up_left_end],point_out_y[:up_left_end])
+		o_u_r = inter(point_out_x[up_left_end-1:up_right_end],point_out_y[up_left_end-1:up_right_end])
+		o_l = inter([point_out_x[0]]+point_out_x[up_right_end-1:][::-1].tolist(),[point_out_y[0]]+point_out_y[up_right_end-1:][::-1].tolist(),'cubic')
+		i_u_l = inter(point_in_x[:up_left_end],point_in_y[:up_left_end])
+		#print(point_out_x)
+		#print(point_out_y)
+		#print(o_u_l)
+		#print(point_in_x)
+		#print(point_in_y)
+		#print(i_u_l)
+		arr1=[]
+		arr1=np.array(arr1)
+		for y in range(int(points[7][0]),int(points[9][0])-1,-1):
+			#w=int(points[y][0])
+			arr1=np.append(arr1,[y],axis=0)
+			#arr1=arr1[::-1]
+		arr1=np.flipud(arr1)
+		i_u_l=list(i_u_l)
+		#arr1=np.array([y for y in range(int(points[7][0]),points[13][0])])
+		arr1=np.floor(arr1)
+		#print(arr1)
+		i_u_l[1]=arr1
+		i_u_l=tuple(i_u_l)
+		print(i_u_l)
+		i_u_r = inter(point_in_x[up_left_end-1:up_right_end],point_in_y[up_left_end-1:up_right_end])
+			
+		i_l = inter([point_in_x[0]]+point_in_x[up_right_end-1:][::-1].tolist(),[point_in_y[0]]+point_in_y[up_right_end-1:][::-1].tolist(),'cubic')
+
+		x = []	#will contain the x coordinates of points on lips
+		y = []  #will contain the y coordinates of points on lips
+
+		def ext(a,b,i):
+			a=int(np.round(a))
+			b=int(np.round(b))
+			#print(arange(a,b,1))
+			x.extend(arange(a,b,1).tolist())
+			y.extend((ones(b-a)*i).tolist())
+
+		for i in range(int(o_u_l[1][0]),int(i_u_l[1][0]+1)):
+			#print(o_u_l[0](i))
+			ext(o_u_l[0](i), o_l[0](i)+1, i)
+
+		for i in range(int(i_u_l[1][0]),int(o_u_l[1][-1]+1)):
+			ext(o_u_l[0](i),i_u_l[0](i)+1,i)
+			ext(i_l[0](i),o_l[0](i)+1,i)
+
+		for i in range(int(i_u_r[1][-1]),int(o_u_r[1][-1]+1)):
+			ext(o_u_r[0](i),o_l[0](i)+1,i)
+
+		for i in range(int(i_u_r[1][0]),int(i_u_r[1][-1]+1)):
+			ext(o_u_r[0](i),i_u_r[0](i)+1,i)
+			ext(i_l[0](i),o_l[0](i)+1,i)
+
+		# Now x and y contains coordinates of all the points on lips
+
+		int_x=[int(z) for z in x]
+		int_y=[int(z) for z in y]
+
+		#int_x = map(int,x)
+		#int_y = map(int,y)
+
+		#print(x)
+		#print("\n")
+		#print(int_y)
+		#print(im[int_x,:])
+		#val = color.rgb2lab((frame[x,y]/255.).reshape(len(x),1,3)).reshape(len(x),3)
+		#print(frame.shape)
+		frame=cv2.resize(frame,(700,700))
+		val = color.rgb2lab((frame[int_x,int_y]/255.).reshape(len(int_x),1,3)).reshape(len(int_x),3)
+		L,A,B = mean(val[:,0]),mean(val[:,1]),mean(val[:,2])
+		L1,A1,B1 = color.rgb2lab(np.array((r/255.,g/255.,b/255.)).reshape(1,1,3)).reshape(3,)
+		ll,aa,bb = L1-L,A1-A,B1-B
+		val[:,0] += ll
+		val[:,1] += aa
+		val[:,2] += bb
+		
+		#val[:,0] = np.clip(val[:,0], 0, 100)
+		#val[:,1] = np.clip(val[:,1], -127, 128)
+		#val[:,2] = np.clip(val[:,2], -127, 128)
+
+		frame[int_x,int_y] = color.lab2rgb(val.reshape(len(int_x),1,3)).reshape(len(int_x),3)*255
+		gca().set_aspect('equal', adjustable='box')
+		print(o_u_l)	
+		#print(inter(point_in_x[0:3],point_in_y[0:3]))	
+		i_u_r = inter(point_in_x[up_left_end-1:up_right_end],point_in_y[up_left_end-1:up_right_end])
+			
+		i_l = inter([point_in_x[0]]+point_in_x[up_right_end-1:][::-1].tolist(),[point_in_y[0]]+point_in_y[up_right_end-1:][::-1].tolist(),'cubic')
+
+		x = []	#will contain the x coordinates of points on lips
+		y = []  #will contain the y coordinates of points on lips
+
+		def ext(a,b,i):
+			a=int(np.round(a))
+			b=int(np.round(b))
+			#print(arange(a,b,1))
+			x.extend(arange(a,b,1).tolist())
+			y.extend((ones(b-a)*i).tolist())
+
+		for i in range(int(o_u_l[1][0]),int(i_u_l[1][0]+1)):
+			ext(o_u_l[0](i), o_l[0](i)+1, i)
+
+		for i in range(int(i_u_l[1][0]),int(o_u_l[1][-1]+1)):
+			ext(o_u_l[0](i),i_u_l[0](i)+1,i)
+			ext(i_l[0](i),o_l[0](i)+1,i)
+
+		for i in range(int(i_u_r[1][-1]),int(o_u_r[1][-1]+1)):
+			ext(o_u_r[0](i),o_l[0](i)+1,i)
+
+		for i in range(int(i_u_r[1][0]),int(i_u_r[1][-1]+1)):
+			ext(o_u_r[0](i),i_u_r[0](i)+1,i)
+			ext(i_l[0](i),o_l[0](i)+1,i)
+
+		# Now x and y contains coordinates of all the points on lips
+
+		int_x=[int(z) for z in x]
+		int_y=[int(z) for z in y]
+
+		#int_x = map(int,x)
+		#int_y = map(int,y)
+
+		#print(x)
+		#print("\n")
+		#print(int_y)
+		#print(im[int_x,:])
+		#val = color.rgb2lab((frame[x,y]/255.).reshape(len(x),1,3)).reshape(len(x),3)
+		#print(frame.shape)
+		frame=cv2.resize(frame,(700,700))
+		val = color.rgb2lab((frame[int_x,int_y]/255.).reshape(len(int_x),1,3)).reshape(len(int_x),3)
+		L,A,B = mean(val[:,0]),mean(val[:,1]),mean(val[:,2])
+		L1,A1,B1 = color.rgb2lab(np.array((r/255.,g/255.,b/255.)).reshape(1,1,3)).reshape(3,)
+		ll,aa,bb = L1-L,A1-A,B1-B
+		val[:,0] += ll
+		val[:,1] += aa
+		val[:,2] += bb
+		
+		#val[:,0] = np.clip(val[:,0], 0, 100)
+		#val[:,1] = np.clip(val[:,1], -127, 128)
+		#val[:,2] = np.clip(val[:,2], -127, 128)
+
+		frame[int_x,int_y] = color.lab2rgb(val.reshape(len(int_x),1,3)).reshape(len(int_x),3)*255
+		gca().set_aspect('equal', adjustable='box')
+
 	cv2.imshow("frame",frame)
 
 	key = cv2.waitKey(1)
